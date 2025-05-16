@@ -1,7 +1,5 @@
 """Main module for the API."""
 
-from pathlib import Path
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
@@ -65,13 +63,13 @@ def download_pptx(file_id: str) -> FileResponse:
         logger.error('File ID is missing')
         raise HTTPException(status_code=400, detail='ID de archivo no proporcionado')
 
-    pptx_filepath = Path(config.TEMP_FOLDER) / file_id
-    if not Path.exists(pptx_filepath):
+    pptx_filepath = config.TEMP_FOLDER / file_id
+    if not pptx_filepath.exists():
         logger.error(f'File {pptx_filepath} not found')
         raise HTTPException(status_code=404, detail='Archivo no encontrado')
 
     def cleanup() -> None:
-        Path.unlink(pptx_filepath, missing_ok=True)
+        pptx_filepath.unlink(missing_ok=True)
         logger.info(f'File {pptx_filepath} deleted')
 
     return FileResponse(

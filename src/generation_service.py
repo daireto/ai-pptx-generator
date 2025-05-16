@@ -3,7 +3,6 @@
 import json
 import uuid
 from collections.abc import Generator
-from pathlib import Path
 
 from src import config
 from src.exceptions import InvalidInferenceProviderError
@@ -37,12 +36,8 @@ class GenerationService:
             Stream of SSE events.
 
         """
-        dst = Path(config.TEMP_FOLDER)
-        if not dst.exists:
-            Path.mkdir(dst, exist_ok=True)
-
         file_id = str(uuid.uuid4())
-        output_file = dst / file_id
+        output_file = config.TEMP_FOLDER / file_id
 
         try:
             logger.info('Starting generation of JSON...')
