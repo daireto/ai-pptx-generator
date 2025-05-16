@@ -1,0 +1,594 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Plantilla para generación de presentaciones con python-pptx",
+    "description": "Esquema compatible con python-pptx para crear presentaciones PPTX dinámicas",
+    "type": "object",
+    "properties": {
+        "title_slide": {
+            "type": "object",
+            "description": "Diapositiva inicial con título y subtítulo",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Texto principal de la diapositiva inicial"
+                },
+                "subtitle": {
+                    "type": "string",
+                    "description": "Texto secundario de la diapositiva inicial"
+                },
+                "style": {
+                    "$ref": "#/definitions/text_style"
+                },
+                "background": {
+                    "type": "object",
+                    "description": "Fondo personalizado",
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "solid"
+                                },
+                                "color": {
+                                    "type": "string",
+                                    "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "type": {
+                                    "const": "gradient"
+                                },
+                                "from": {
+                                    "type": "string",
+                                    "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                },
+                                "to": {
+                                    "type": "string",
+                                    "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                },
+                                "direction": {
+                                    "type": "string",
+                                    "enum": [
+                                        "vertical",
+                                        "horizontal"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "title"
+            ]
+        },
+        "slides": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "layout": {
+                        "type": "string",
+                        "enum": [
+                            "text_left_image_right",
+                            "two_column_text",
+                            "image_full_width_with_caption",
+                            "text_top_table_bottom",
+                            "text_with_bullet_points",
+                            "chart"
+                        ]
+                    },
+                    "background_color": {
+                        "type": "string",
+                        "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                    },
+                    "background": {
+                        "type": "object",
+                        "description": "Fondo personalizado",
+                        "oneOf": [
+                            {
+                                "properties": {
+                                    "type": {
+                                        "const": "solid"
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                    }
+                                }
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "const": "gradient"
+                                    },
+                                    "from": {
+                                        "type": "string",
+                                        "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                    },
+                                    "to": {
+                                        "type": "string",
+                                        "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                    },
+                                    "direction": {
+                                        "type": "string",
+                                        "enum": [
+                                            "vertical",
+                                            "horizontal"
+                                        ]
+                                    },
+                                    "overlay_opacity": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "elements": {
+                        "type": "object",
+                        "description": "Elementos según diseño del layout",
+                        "properties": {
+                            "title": {
+                                "$ref": "#/definitions/text_element"
+                            },
+                            "paragraphs": {
+                                "$ref": "#/definitions/multi_text"
+                            },
+                            "image": {
+                                "$ref": "#/definitions/image_element"
+                            },
+                            "caption": {
+                                "$ref": "#/definitions/text_element"
+                            },
+                            "columns": {
+                                "type": "array",
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "paragraphs": {
+                                            "$ref": "#/definitions/multi_text"
+                                        }
+                                    }
+                                }
+                            },
+                            "table": {
+                                "type": "object",
+                                "properties": {
+                                    "headers": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "rows": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "style": {
+                                        "type": "object",
+                                        "properties": {
+                                            "font_name": {
+                                                "type": "string"
+                                            },
+                                            "font_size": {
+                                                "type": "number"
+                                            },
+                                            "header_fill": {
+                                                "type": "string",
+                                                "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                            },
+                                            "header_font_color": {
+                                                "type": "string",
+                                                "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                            },
+                                            "cell_fill": {
+                                                "type": "string",
+                                                "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                            },
+                                            "effects": {
+                                                "$ref": "#/definitions/effects"
+                                            }
+                                        }
+                                    },
+                                    "position": {
+                                        "$ref": "#/definitions/position"
+                                    }
+                                }
+                            },
+                            "bullet_points": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/text_element"
+                                }
+                            },
+                            "chart": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "COLUMN_CLUSTERED",
+                                            "PIE",
+                                            "LINE",
+                                            "BAR"
+                                        ]
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "categories": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "series": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "number"
+                                                    }
+                                                }
+                                            },
+                                            "required": ["name", "values"]
+                                        }
+                                    },
+                                    "data_labels": {
+                                        "type": "boolean"
+                                    },
+                                    "legend_position": {
+                                        "type": "string",
+                                        "enum": [
+                                            "top",
+                                            "bottom",
+                                            "left",
+                                            "right"
+                                        ]
+                                    },
+                                    "position": {
+                                        "$ref": "#/definitions/position"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "layout"
+                ],
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "layout": { "const": "text_left_image_right" }
+                            },
+                            "required": ["layout"]
+                        },
+                        "then": {
+                            "properties": {
+                                "elements": {
+                                    "required": ["title", "paragraphs", "image"]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "layout": { "const": "two_column_text" }
+                            },
+                            "required": ["layout"]
+                        },
+                        "then": {
+                            "properties": {
+                                "elements": {
+                                    "required": ["title", "columns"]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "layout": { "const": "image_full_width_with_caption" }
+                            },
+                            "required": ["layout"]
+                        },
+                        "then": {
+                            "properties": {
+                                "elements": {
+                                    "required": ["image", "caption"]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "layout": { "const": "text_top_table_bottom" }
+                            },
+                            "required": ["layout"]
+                        },
+                        "then": {
+                            "properties": {
+                                "elements": {
+                                    "required": ["title", "paragraphs", "table"]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "layout": { "const": "text_with_bullet_points" }
+                            },
+                            "required": ["layout"]
+                        },
+                        "then": {
+                            "properties": {
+                                "elements": {
+                                    "required": ["title", "bullet_points"]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "layout": { "const": "chart" }
+                            },
+                            "required": ["layout"]
+                        },
+                        "then": {
+                            "properties": {
+                                "elements": {
+                                    "required": ["title", "chart"]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "text_element": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "style": {
+                    "$ref": "#/definitions/text_style"
+                },
+                "textbox_style": {
+                    "type": "object",
+                    "properties": {
+                        "margin_top": {
+                            "type": "number"
+                        },
+                        "margin_bottom": {
+                            "type": "number"
+                        },
+                        "margin_left": {
+                            "type": "number"
+                        },
+                        "margin_right": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "effects": {
+                    "type": "object",
+                    "properties": {
+                        "shadow": {
+                            "type": "object",
+                            "properties": {
+                                "color": {
+                                    "type": "string",
+                                    "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                },
+                                "opacity": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "blur": {
+                                    "type": "number"
+                                },
+                                "offset_x": {
+                                    "type": "number"
+                                },
+                                "offset_y": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "border": {
+                            "type": "object",
+                            "properties": {
+                                "color": {
+                                    "type": "string",
+                                    "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                                },
+                                "width": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                },
+                "position": {
+                    "$ref": "#/definitions/position"
+                }
+            }
+        },
+        "image_element": {
+            "type": "object",
+            "properties": {
+                "pixabay_query": {
+                    "type": "string"
+                },
+                "style": {
+                    "type": "object",
+                    "properties": {
+                        "cover": {
+                            "type": "boolean"
+                        },
+                        "position": {
+                            "type": "string",
+                            "enum": [
+                                "left",
+                                "right",
+                                "center"
+                            ]
+                        },
+                        "effects": {
+                            "$ref": "#/definitions/effects"
+                        }
+                    }
+                },
+                "position": {
+                    "$ref": "#/definitions/position"
+                }
+            }
+        },
+        "multi_text": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/text_element"
+            }
+        },
+        "position": {
+            "type": "object",
+            "properties": {
+                "left": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "top": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "width": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "height": {
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
+        "effects": {
+            "type": "object",
+            "properties": {
+                "shadow": {
+                    "type": "object",
+                    "properties": {
+                        "color": {
+                            "type": "string",
+                            "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                        },
+                        "opacity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        },
+                        "blur": {
+                            "type": "number"
+                        },
+                        "offset_x": {
+                            "type": "number"
+                        },
+                        "offset_y": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "border": {
+                    "type": "object",
+                    "properties": {
+                        "color": {
+                            "type": "string",
+                            "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                        },
+                        "width": {
+                            "type": "number"
+                        },
+                        "radius": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "text_style": {
+            "type": "object",
+            "description": "Estilos de texto aplicables",
+            "properties": {
+                "font_name": {
+                    "type": "string",
+                    "examples": [
+                        "Arial",
+                        "Calibri",
+                        "Segoe UI"
+                    ]
+                },
+                "font_size": {
+                    "type": "number",
+                    "examples": [
+                        32,
+                        44
+                    ]
+                },
+                "bold": {
+                    "type": "boolean"
+                },
+                "italic": {
+                    "type": "boolean"
+                },
+                "underline": {
+                    "type": "boolean"
+                },
+                "color": {
+                    "type": "string",
+                    "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                },
+                "alignment": {
+                    "type": "string",
+                    "enum": [
+                        "left",
+                        "center",
+                        "right"
+                    ]
+                },
+                "line_spacing": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "title_slide",
+        "slides"
+    ]
+}

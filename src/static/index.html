@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de presentaciones PPTX</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .accordion {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .accordion-item {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 15px;
+            background-color: var(--light-color);
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header:not(.interactive) {
+            cursor: default;
+            background-color: #f8f9fa !important;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .json-display {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .status-message {
+            padding: 20px;
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        .success-message {
+            color: var(--success-color);
+        }
+
+        .error-message {
+            color: var(--warning-color);
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: var(--dark-color);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .download-btn {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            background-color: var(--accent-color);
+            border-radius: var(--border-radius);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Generador de presentaciones PPTX</h1>
+
+        <div class="input-group">
+            <input type="text" id="topicInput" placeholder="Ingresa el tema de la presentación...">
+            <button id="generateBtn">Generar</button>
+        </div>
+
+        <div class="accordion" id="presentationAccordion">
+            <div class="accordion-item" id="jsonGenerationItem">
+                <div class="accordion-header">
+                    <span>Generación del JSON</span>
+                    <span id="jsonStatus">⏳</span>
+                </div>
+                <div class="accordion-content" id="jsonGenerationContent">
+                    <div id="jsonOutput" class="json-display"></div>
+                </div>
+            </div>
+
+            <div class="accordion-item" id="jsonVerificationItem">
+                <div class="accordion-header">
+                    <span>Verificación del JSON</span>
+                    <span id="verificationStatus">⏳</span>
+                </div>
+                <div class="accordion-content" id="jsonVerificationContent">
+                    <div id="verificationOutput"></div>
+                </div>
+            </div>
+
+            <div class="accordion-item" id="pptxGenerationItem">
+                <div class="accordion-header">
+                    <span>Generación de la presentación</span>
+                    <span id="pptxStatus">⏳</span>
+                </div>
+                <div class="accordion-content" id="pptxGenerationContent">
+                    <div id="pptxOutput"></div>
+                    <button id="downloadBtn" class="download-btn hidden">Descargar presentación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const topicInput = document.getElementById('topicInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const jsonOutput = document.getElementById('jsonOutput');
+            const verificationOutput = document.getElementById('verificationOutput');
+            const pptxOutput = document.getElementById('pptxOutput');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const presentationAccordion = document.getElementById('presentationAccordion');
+
+            // Elementos del acordeón
+            const jsonGenerationItem = document.getElementById('jsonGenerationItem');
+            const jsonVerificationItem = document.getElementById('jsonVerificationItem');
+            const pptxGenerationItem = document.getElementById('pptxGenerationItem');
+            const jsonGenerationContent = document.getElementById('jsonGenerationContent');
+            const jsonVerificationContent = document.getElementById('jsonVerificationContent');
+            const pptxGenerationContent = document.getElementById('pptxGenerationContent');
+
+            const jsonStatus = document.getElementById('jsonStatus');
+            const verificationStatus = document.getElementById('verificationStatus');
+            const pptxStatus = document.getElementById('pptxStatus');
+
+            let eventSource;
+            let currentStep = 'json-generation';
+            let fullJson = '';
+            let fixedJson = '';
+            let currentFileId = null;
+
+            let accordionEnabled = false; // Variable de estado global
+
+            function setupAccordion(enabled = false) {
+                accordionEnabled = enabled;
+                const headers = document.querySelectorAll('.accordion-header');
+
+                headers.forEach(header => {
+                    // Actualiza el cursor visualmente
+                    header.style.cursor = enabled ? 'pointer' : 'default';
+                });
+            }
+
+            // Mostrar un item específico del acordeón (para el flujo automático)
+            function showAccordionItem(itemToShow) {
+                document.querySelectorAll('.accordion-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                itemToShow.classList.add('active');
+            }
+
+            function startGeneration() {
+                const topic = topicInput.value.trim();
+                if (!topic) {
+                    alert('Por favor ingresa un tema para la presentación');
+                    return;
+                }
+
+                // Reset UI
+                generateBtn.disabled = true;
+                jsonOutput.innerHTML = '<div class="status-message">Iniciando generación...</div>';
+                verificationOutput.innerHTML = '';
+                pptxOutput.innerHTML = '';
+                downloadBtn.classList.add('hidden');
+
+                // Mostrar el acordeón
+                presentationAccordion.style.display = 'block';
+
+                // Resetear estados
+                jsonStatus.textContent = '🔄';
+                verificationStatus.textContent = '⏳';
+                pptxStatus.textContent = '⏳';
+
+                // Configurar acordeón
+                setupAccordion(false);
+                showAccordionItem(jsonGenerationContent);
+
+                currentStep = 'json-generation';
+                fullJson = '';
+                fixedJson = '';
+
+                // Iniciar conexión SSE
+                if (eventSource) eventSource.close();
+
+                eventSource = new EventSource(`/api/generate-presentation?topic=${encodeURIComponent(topic)}`);
+
+                eventSource.addEventListener('message', function (event) {
+                    const data = JSON.parse(event.data);
+                    const content = data.content;
+
+                    // Si es el primer chunk y hay mensaje de "Iniciando generación..."
+                    if (currentStep === 'json-generation' && jsonOutput.innerHTML.includes('Iniciando generación')) {
+                        jsonOutput.innerHTML = ''; // Limpia el mensaje inicial
+                        fullJson = ''; // Reinicia el contenido
+                    }
+
+                    if (content.includes('FIX-JSON-STEP')) {
+                        currentStep = 'json-fix';
+                        verificationStatus.textContent = '🔄';
+                        verificationOutput.innerHTML = '<div class="status-message">Corrigiendo JSON...</div>';
+                        jsonStatus.textContent = '✅';
+                        showAccordionItem(jsonVerificationContent);
+                        return;
+                    }
+
+                    if (content.includes('FIX-JSON-FAILED')) {
+                        currentStep = 'json-fix';
+                        verificationStatus.textContent = '❌';
+                        verificationOutput.innerHTML = '<div class="status-message error-message">Error corrigiendo el JSON</div>';
+                        jsonStatus.textContent = '✅';
+                        showAccordionItem(jsonVerificationContent);
+                        eventSource.close();
+                        generateBtn.disabled = false;
+                        return;
+                    }
+
+                    if (content.includes('FIX-JSON-CLEAN')) {
+                        currentStep = 'json-fix';
+                        verificationStatus.textContent = '🔄';
+                        verificationOutput.innerHTML = '<div class="status-message">Limpieza de JSON...</div>';
+                        jsonStatus.textContent = '✅';
+                        showAccordionItem(jsonVerificationContent);
+                        return;
+                    }
+
+                    if (content.includes('PPTX-GEN-STEP')) {
+                        currentStep = 'pptx-generation';
+                        pptxStatus.textContent = '🔄';
+                        pptxOutput.innerHTML = '<div class="status-message">Generando presentación...</div>';
+                        verificationStatus.textContent = '✅';
+                        verificationOutput.innerHTML = '<div class="status-message success-message">El JSON es correcto y válido</div>';
+                        jsonStatus.textContent = '✅';
+                        showAccordionItem(pptxGenerationContent);
+                        return;
+                    }
+
+                    if (content.includes('PPTX-GEN-DONE')) {
+                        if (content.includes(':')) {
+                            currentFileId = content.split(':')[1];
+                            pptxStatus.textContent = '✅';
+                            pptxOutput.innerHTML = '<div class="status-message success-message">¡Presentación generada correctamente!</div>';
+                            downloadBtn.classList.remove('hidden');
+                        } else {
+                            pptxStatus.textContent = '❌';
+                            pptxOutput.innerHTML = '<div class="status-message error-message">Error generando la presentación</div>';
+                        }
+                        eventSource.close();
+                        generateBtn.disabled = false;
+                        setupAccordion(true);
+                        return;
+                    }
+
+                    if (content.includes('PPTX-GEN-ERROR')) {
+                        if (content.includes(':')) {
+                            let errorMessage = content.split(':')[1];
+                            pptxStatus.textContent = '❌';
+                            pptxOutput.innerHTML = `<div class="status-message error-message">${errorMessage}</div>`;
+                        } else {
+                            pptxStatus.textContent = '❌';
+                            pptxOutput.innerHTML = '<div class="status-message error-message">Error generando la presentación</div>';
+                        }
+                        jsonStatus.textContent = '✅';
+                        showAccordionItem(pptxGenerationContent);
+                        eventSource.close();
+                        generateBtn.disabled = false;
+                        return;
+                    }
+
+                    if (currentStep === 'json-generation') {
+                        fullJson += content;
+                        jsonOutput.textContent = fullJson;
+                        jsonOutput.scrollTop = jsonOutput.scrollHeight;
+
+                        if (!jsonOutput.querySelector('.typing-cursor')) {
+                            const cursor = document.createElement('span');
+                            cursor.className = 'typing-cursor';
+                            jsonOutput.appendChild(cursor);
+                        }
+                    } else if (currentStep === 'json-fix') {
+                        fixedJson += content;
+                        verificationOutput.innerHTML = `<div class="json-display">${fixedJson}<span class="typing-cursor"></span></div>`;
+                        verificationOutput.scrollTop = verificationOutput.scrollHeight;
+                    }
+                });
+
+                eventSource.addEventListener('error', function () {
+                    if (eventSource.readyState === EventSource.CLOSED) {
+                        // Conexión cerrada normalmente
+                    } else {
+                        console.error('Error en la conexión SSE');
+                        generateBtn.disabled = false;
+                    }
+                });
+            }
+
+            function downloadPresentation() {
+                window.location.href = '/api/download-pptx?file_id=' + currentFileId;
+            }
+
+            // Evento de click delegado (mejor performance)
+            document.addEventListener('click', function (e) {
+                if (!accordionEnabled) return;
+
+                const header = e.target.closest('.accordion-header');
+                if (header) {
+                    const content = header.nextElementSibling;
+                    content.classList.toggle('active');
+                }
+            });
+
+            generateBtn.addEventListener('click', startGeneration);
+            downloadBtn.addEventListener('click', downloadPresentation);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,9 @@
+fastapi[standard]
+httpx
+huggingface-hub
+json-repair
+langchain
+openai
+orjson
+python-dotenv
+python-pptx
