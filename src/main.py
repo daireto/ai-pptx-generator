@@ -22,8 +22,8 @@ app.add_middleware(
 app.mount('/static', StaticFiles(directory='src/static'), name='static')
 
 
-@app.get('/api/generate-presentation')
-def generate_presentation(topic: str) -> StreamingResponse:
+@app.get('/api/generate')
+def generate(topic: str) -> StreamingResponse:
     """Generate a PowerPoint presentation for the given topic.
 
     Parameters
@@ -44,9 +44,9 @@ def generate_presentation(topic: str) -> StreamingResponse:
     )
 
 
-@app.get('/api/download-pptx')
-def download_pptx(file_id: str) -> FileResponse:
-    """Download the generated PowerPoint presentation.
+@app.get('/api/download/{file_id}')
+def download(file_id: str) -> FileResponse:
+    """Download the generated file.
 
     Parameters
     ----------
