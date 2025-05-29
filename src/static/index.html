@@ -114,11 +114,11 @@
         }
 
         .accordion-content {
-            padding: 15px;
+            padding: 10px;
             background-color: white;
             border-top: 1px solid #ddd;
             min-height: 100px;
-            max-height: 300px;
+            max-height: 320px;
             overflow-y: auto;
             transition: all 0.3s ease;
             display: none;
@@ -135,6 +135,8 @@
             padding: 10px;
             border-radius: 4px;
             border: 1px solid #eee;
+            overflow-y: auto;
+            max-height: 290px;
         }
 
         .status-message {
@@ -198,7 +200,7 @@
             <button id="generateBtn">Generar</button>
         </div>
 
-        <div class="accordion" id="presentationAccordion">
+        <div class="accordion" id="accordion">
             <div class="accordion-item" id="jsonGenerationItem">
                 <div class="accordion-header">
                     <span>Generación del JSON</span>
@@ -215,17 +217,17 @@
                     <span id="verificationStatus">⏳</span>
                 </div>
                 <div class="accordion-content" id="jsonVerificationContent">
-                    <div id="verificationOutput"></div>
+                    <div id="verificationOutput" class="json-display"></div>
                 </div>
             </div>
 
-            <div class="accordion-item" id="pptxGenerationItem">
+            <div class="accordion-item" id="fileGenerationItem">
                 <div class="accordion-header">
                     <span>Generación de la presentación</span>
-                    <span id="pptxStatus">⏳</span>
+                    <span id="fileStatus">⏳</span>
                 </div>
-                <div class="accordion-content" id="pptxGenerationContent">
-                    <div id="pptxOutput"></div>
+                <div class="accordion-content" id="fileGenerationContent">
+                    <div id="fileOutput"></div>
                     <button id="downloadBtn" class="download-btn hidden">Descargar presentación</button>
                 </div>
             </div>
@@ -238,41 +240,32 @@
             const generateBtn = document.getElementById('generateBtn');
             const jsonOutput = document.getElementById('jsonOutput');
             const verificationOutput = document.getElementById('verificationOutput');
-            const pptxOutput = document.getElementById('pptxOutput');
+            const fileOutput = document.getElementById('fileOutput');
             const downloadBtn = document.getElementById('downloadBtn');
-            const presentationAccordion = document.getElementById('presentationAccordion');
-
-            // Elementos del acordeón
-            const jsonGenerationItem = document.getElementById('jsonGenerationItem');
-            const jsonVerificationItem = document.getElementById('jsonVerificationItem');
-            const pptxGenerationItem = document.getElementById('pptxGenerationItem');
+            const accordion = document.getElementById('accordion');
             const jsonGenerationContent = document.getElementById('jsonGenerationContent');
             const jsonVerificationContent = document.getElementById('jsonVerificationContent');
-            const pptxGenerationContent = document.getElementById('pptxGenerationContent');
-
+            const fileGenerationContent = document.getElementById('fileGenerationContent');
             const jsonStatus = document.getElementById('jsonStatus');
             const verificationStatus = document.getElementById('verificationStatus');
-            const pptxStatus = document.getElementById('pptxStatus');
+            const fileStatus = document.getElementById('fileStatus');
 
             let eventSource;
             let currentStep = 'json-generation';
             let fullJson = '';
             let fixedJson = '';
             let currentFileId = null;
-
-            let accordionEnabled = false; // Variable de estado global
+            let accordionEnabled = false;
 
             function setupAccordion(enabled = false) {
                 accordionEnabled = enabled;
                 const headers = document.querySelectorAll('.accordion-header');
 
                 headers.forEach(header => {
-                    // Actualiza el cursor visualmente
                     header.style.cursor = enabled ? 'pointer' : 'default';
                 });
             }
 
-            // Mostrar un item específico del acordeón (para el flujo automático)
             function showAccordionItem(itemToShow) {
                 document.querySelectorAll('.accordion-content').forEach(content => {
                     content.classList.remove('active');
@@ -280,10 +273,19 @@
                 itemToShow.classList.add('active');
             }
 
-            function startGeneration() {
+            function scrollToBottom(elementId) {
+                const el = document.getElementById(elementId);
+                if (el) el.scrollTop = el.scrollHeight;
+            }
+
+            generateBtn.addEventListener('click', () => {
                 const topic = topicInput.value.trim();
                 if (!topic) {
                     alert('Por favor ingresa un tema para la presentación');
+                    return;
+                }
+                if (topic.length < 3 || topic.length > 100) {
+                    alert('El tema debe tener entre 3 y 100 caracteres.');
                     return;
                 }
 
@@ -291,18 +293,14 @@
                 generateBtn.disabled = true;
                 jsonOutput.innerHTML = '<div class="status-message">Iniciando generación...</div>';
                 verificationOutput.innerHTML = '';
-                pptxOutput.innerHTML = '';
+                fileOutput.innerHTML = '';
                 downloadBtn.classList.add('hidden');
 
-                // Mostrar el acordeón
-                presentationAccordion.style.display = 'block';
-
-                // Resetear estados
                 jsonStatus.textContent = '🔄';
                 verificationStatus.textContent = '⏳';
-                pptxStatus.textContent = '⏳';
+                fileStatus.textContent = '⏳';
 
-                // Configurar acordeón
+                accordion.style.display = 'block';
                 setupAccordion(false);
                 showAccordionItem(jsonGenerationContent);
 
@@ -310,23 +308,19 @@
                 fullJson = '';
                 fixedJson = '';
 
-                // Iniciar conexión SSE
                 if (eventSource) eventSource.close();
-
-                eventSource = new EventSource(`/api/generate-presentation?topic=${encodeURIComponent(topic)}`);
-
-                eventSource.addEventListener('message', function (event) {
+                eventSource = new EventSource(`/api/generate?topic=${encodeURIComponent(topic)}`);
+                eventSource.onmessage = function (event) {
                     const data = JSON.parse(event.data);
-                    const content = data.content;
 
-                    // Si es el primer chunk y hay mensaje de "Iniciando generación..."
                     if (currentStep === 'json-generation' && jsonOutput.innerHTML.includes('Iniciando generación')) {
-                        jsonOutput.innerHTML = ''; // Limpia el mensaje inicial
-                        fullJson = ''; // Reinicia el contenido
+                        jsonOutput.innerHTML = '';
+                        fullJson = '';
                     }
 
-                    if (content.includes('FIX-JSON-STEP')) {
+                    if (data.type === 'step' && data.message.includes('FIX-JSON-STEP')) {
                         currentStep = 'json-fix';
+                        fixedJson = '';
                         verificationStatus.textContent = '🔄';
                         verificationOutput.innerHTML = '<div class="status-message">Corrigiendo JSON...</div>';
                         jsonStatus.textContent = '✅';
@@ -334,7 +328,7 @@
                         return;
                     }
 
-                    if (content.includes('FIX-JSON-FAILED')) {
+                    if (data.type === 'step' && data.message.includes('FIX-JSON-FAILED')) {
                         currentStep = 'json-fix';
                         verificationStatus.textContent = '❌';
                         verificationOutput.innerHTML = '<div class="status-message error-message">Error corrigiendo el JSON</div>';
@@ -345,7 +339,7 @@
                         return;
                     }
 
-                    if (content.includes('FIX-JSON-CLEAN')) {
+                    if (data.type === 'step' && data.message.includes('FIX-JSON-CLEAN')) {
                         currentStep = 'json-fix';
                         verificationStatus.textContent = '🔄';
                         verificationOutput.innerHTML = '<div class="status-message">Limpieza de JSON...</div>';
@@ -354,26 +348,26 @@
                         return;
                     }
 
-                    if (content.includes('PPTX-GEN-STEP')) {
-                        currentStep = 'pptx-generation';
-                        pptxStatus.textContent = '🔄';
-                        pptxOutput.innerHTML = '<div class="status-message">Generando presentación...</div>';
+                    if (data.type === 'step' && data.message.includes('FILE-GEN-STEP')) {
+                        currentStep = 'file-generation';
+                        fileStatus.textContent = '🔄';
+                        fileOutput.innerHTML = '<div class="status-message">Generando presentación...</div>';
                         verificationStatus.textContent = '✅';
                         verificationOutput.innerHTML = '<div class="status-message success-message">El JSON es correcto y válido</div>';
                         jsonStatus.textContent = '✅';
-                        showAccordionItem(pptxGenerationContent);
+                        showAccordionItem(fileGenerationContent);
                         return;
                     }
 
-                    if (content.includes('PPTX-GEN-DONE')) {
-                        if (content.includes(':')) {
-                            currentFileId = content.split(':')[1];
-                            pptxStatus.textContent = '✅';
-                            pptxOutput.innerHTML = '<div class="status-message success-message">¡Presentación generada correctamente!</div>';
+                    if (data.type === 'step' && data.message.includes('FILE-GEN-DONE')) {
+                        if (data.message.includes(':')) {
+                            currentFileId = data.message.split(':')[1];
+                            fileStatus.textContent = '✅';
+                            fileOutput.innerHTML = '<div class="status-message success-message">¡Presentación generada correctamente!</div>';
                             downloadBtn.classList.remove('hidden');
                         } else {
-                            pptxStatus.textContent = '❌';
-                            pptxOutput.innerHTML = '<div class="status-message error-message">Error generando la presentación</div>';
+                            fileStatus.textContent = '❌';
+                            fileOutput.innerHTML = '<div class="status-message error-message">No se pudo generar el archivo</div>';
                         }
                         eventSource.close();
                         generateBtn.disabled = false;
@@ -381,54 +375,58 @@
                         return;
                     }
 
-                    if (content.includes('PPTX-GEN-ERROR')) {
-                        if (content.includes(':')) {
-                            let errorMessage = content.split(':')[1];
-                            pptxStatus.textContent = '❌';
-                            pptxOutput.innerHTML = `<div class="status-message error-message">${errorMessage}</div>`;
+                    if (data.type === 'step' && data.message.includes('FILE-GEN-ERROR')) {
+                        if (data.message.includes(':')) {
+                            let errorMessage = data.message.split(':')[1];
+                            fileStatus.textContent = '❌';
+                            fileOutput.innerHTML = `<div class="status-message error-message">Ha ocurrido un error al generar el archivo: ${errorMessage}</div>`;
                         } else {
-                            pptxStatus.textContent = '❌';
-                            pptxOutput.innerHTML = '<div class="status-message error-message">Error generando la presentación</div>';
+                            fileStatus.textContent = '❌';
+                            fileOutput.innerHTML = '<div class="status-message error-message">Ha ocurrido un error desconocido al generar el archivo</div>';
                         }
                         jsonStatus.textContent = '✅';
-                        showAccordionItem(pptxGenerationContent);
+                        showAccordionItem(fileGenerationContent);
                         eventSource.close();
                         generateBtn.disabled = false;
                         return;
                     }
 
-                    if (currentStep === 'json-generation') {
-                        fullJson += content;
-                        jsonOutput.textContent = fullJson;
-                        jsonOutput.scrollTop = jsonOutput.scrollHeight;
-
-                        if (!jsonOutput.querySelector('.typing-cursor')) {
-                            const cursor = document.createElement('span');
-                            cursor.className = 'typing-cursor';
-                            jsonOutput.appendChild(cursor);
-                        }
-                    } else if (currentStep === 'json-fix') {
-                        fixedJson += content;
-                        verificationOutput.innerHTML = `<div class="json-display">${fixedJson}<span class="typing-cursor"></span></div>`;
-                        verificationOutput.scrollTop = verificationOutput.scrollHeight;
+                    if (data.type !== 'chunk') {
+                        return;
                     }
-                });
 
-                eventSource.addEventListener('error', function () {
+                    if (currentStep === 'json-generation') {
+                        fullJson += data.message;
+                        jsonOutput.innerHTML = fullJson + '<span class="typing-cursor"></span>';
+                        scrollToBottom('jsonOutput');
+                    }
+
+                    if (currentStep === 'json-fix') {
+                        fixedJson += data.message;
+                        verificationOutput.innerHTML = fixedJson + '<span class="typing-cursor"></span>';
+                        scrollToBottom('verificationOutput');
+                    }
+                };
+
+                eventSource.onerror = function () {
                     if (eventSource.readyState === EventSource.CLOSED) {
-                        // Conexión cerrada normalmente
+                        console.log('Conexión SSE cerrada');
                     } else {
                         console.error('Error en la conexión SSE');
                         generateBtn.disabled = false;
+                        podcastStatus.textContent = '❌';
+                        podcastOutput.innerHTML = '<div class="status-message error-message">Error en la conexión con el servidor.</div>';
+                        eventSource.close();
                     }
-                });
-            }
+                };
+            });
 
-            function downloadPresentation() {
-                window.location.href = '/api/download-pptx?file_id=' + currentFileId;
-            }
+            downloadBtn.addEventListener('click', () => {
+                if (currentFileId) {
+                    window.open(`/api/download/${currentFileId}`, '_blank');
+                }
+            });
 
-            // Evento de click delegado (mejor performance)
             document.addEventListener('click', function (e) {
                 if (!accordionEnabled) return;
 
@@ -438,9 +436,6 @@
                     content.classList.toggle('active');
                 }
             });
-
-            generateBtn.addEventListener('click', startGeneration);
-            downloadBtn.addEventListener('click', downloadPresentation);
         });
     </script>
 </body>
