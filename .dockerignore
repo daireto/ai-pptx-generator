@@ -3,6 +3,9 @@
 .ignore/
 .idea/
 
+# Generated temp files
+.temp/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
