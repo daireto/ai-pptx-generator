@@ -3,21 +3,19 @@
 from collections.abc import Iterable
 from typing import Any
 
+from src.definitions import ITEMS_COUNT
 from src.llm_client import LLMClient
 from src.logger import logger
 from src.prompts import fix_prompt_template, generation_prompt_template
 from src.resources import (
     json_example_minified_1,
     json_example_minified_2,
-    json_example_minified_3,
     json_schema_minified,
 )
 
 
 class JSONGenerator:
-    """Ask a LLM to generate a JSON for creating
-    a PowerPoint presentation.
-    """
+    """Ask a LLM to generate a JSON about a topic."""
 
     def __init__(self, client: LLMClient) -> None:
         """Initialize the JSONGenerator.
@@ -31,7 +29,7 @@ class JSONGenerator:
         self.__client = client
 
     def generate_json(self, topic: str) -> Iterable[Any]:
-        """Generate a JSON for creating a PowerPoint presentation.
+        """Generate a JSON about a topic.
 
         Parameters
         ----------
@@ -91,11 +89,12 @@ class JSONGenerator:
             json_schema_minified=json_schema_minified,
             json_example_minified_1=json_example_minified_1,
             json_example_minified_2=json_example_minified_2,
-            json_example_minified_3=json_example_minified_3,
-            count=6,
+            count=ITEMS_COUNT,
         )
 
     def _prepare_fix_prompt(self, json: str) -> str:
         return fix_prompt_template.format(
-            json=json, json_schema_minified=json_schema_minified
+            json=json,
+            json_schema_minified=json_schema_minified,
+            count=ITEMS_COUNT,
         )

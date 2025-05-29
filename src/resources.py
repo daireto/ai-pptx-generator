@@ -14,5 +14,4 @@ def _read_file(filename: str) -> str:
 
 json_example_minified_1 = _read_file('example1.minified.json')
 json_example_minified_2 = _read_file('example2.minified.json')
-json_example_minified_3 = _read_file('example3.minified.json')
 json_schema_minified = _read_file('schema.minified.json')

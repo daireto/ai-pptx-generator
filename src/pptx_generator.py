@@ -29,7 +29,7 @@ class PPTXGenerator:
     """Generate a PowerPoint presentation from a JSON string."""
 
     def __init__(self, pixabay_api_key: Secret | None = None) -> None:
-        """Initialize the PPTXGenerator.
+        """Initialize the generator.
 
         Parameters
         ----------
@@ -74,7 +74,7 @@ class PPTXGenerator:
         self._process(data)
         self.prs.save(output_file)
 
-    def test_json(self, json_str: str) -> bool:
+    def test_json(self, json_str: str) -> None:
         """Test if a JSON string is valid.
 
         Parameters
@@ -82,22 +82,12 @@ class PPTXGenerator:
         json_str : str
             JSON string to test.
 
-        Returns
-        -------
-        bool
-            True if the JSON is valid, False otherwise.
-
         """
-        try:
-            data = orjson.loads(json_str)
-            self._process(data)
-            self.prs = Presentation()
-            self.slide_width = self.prs.slide_width or Inches(10)
-            self.slide_height = self.prs.slide_height or Inches(7.5)
-        except orjson.JSONDecodeError:
-            return False
-        else:
-            return True
+        data = orjson.loads(json_str)
+        self._process(data)
+        self.prs = Presentation()
+        self.slide_width = self.prs.slide_width or Inches(10)
+        self.slide_height = self.prs.slide_height or Inches(7.5)
 
     def rgb(self, hex_color: str) -> RGBColor:
         """Convert a hex color to a RGBColor object.
@@ -295,11 +285,12 @@ class PPTXGenerator:
         if not self.__pixabay_api_key:
             return None
 
-        query = re.sub(r'-|_', ' ', query)
+        query = re.sub(r'[-_]', ' ', query)
         response = httpx.get(
             PIXABAY_API_URL,
             params={'key': str(self.__pixabay_api_key), 'q': query},
             timeout=10,
+            verify=False
         )
         if not response.is_success:
             return None
@@ -309,7 +300,7 @@ class PPTXGenerator:
             return None
 
         image_url = random.choice(data['hits'])['webformatURL']
-        image_response = httpx.get(image_url, timeout=10)
+        image_response = httpx.get(image_url, timeout=10, verify=False)
         if not image_response.is_success:
             return None
 
@@ -446,7 +437,9 @@ class PPTXGenerator:
     ) -> None:
         chart_type_str = chart_data_json.get('type', 'COLUMN_CLUSTERED').upper()
         chart_type = getattr(
-            XL_CHART_TYPE, chart_type_str, XL_CHART_TYPE.COLUMN_CLUSTERED
+            XL_CHART_TYPE,
+            chart_type_str,
+            XL_CHART_TYPE.COLUMN_CLUSTERED,
         )
 
         chart_data = CategoryChartData()
@@ -456,10 +449,30 @@ class PPTXGenerator:
             chart_data.add_series(serie.get('name', ''), serie.get('values', []))
 
         pos = position or {}
-        x = Inches(pos.get('left', 1))
-        y = Inches(pos.get('top', 2))
-        cx = Inches(pos.get('width', 8))
-        cy = Inches(pos.get('height', 4.5))
+
+        MIN_WIDTH = Inches(8)
+        MIN_HEIGHT = Inches(4)
+
+        raw_left = pos.get('left', 1)
+        raw_top = pos.get('top', 2)
+        raw_width = pos.get('width', 8)
+        raw_height = pos.get('height', 4.5)
+
+        requested_width = Inches(raw_width)
+        requested_height = Inches(raw_height)
+
+        # Dimensiones finales con mínimos
+        cx = max(requested_width, MIN_WIDTH)
+        cy = max(requested_height, MIN_HEIGHT)
+
+        # Compensar si se aumentó el ancho: centrar respecto al valor original
+        if cx > requested_width:
+            extra_width = cx - requested_width
+            x = Inches(raw_left) - int((extra_width / 2))
+        else:
+            x = Inches(raw_left)
+
+        y = Inches(raw_top)
 
         chart_shape = slide.shapes.add_chart(chart_type, x, y, cx, cy, chart_data)  # type: ignore
         chart = chart_shape.chart  # type: ignore

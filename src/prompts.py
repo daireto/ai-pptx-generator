@@ -1,6 +1,4 @@
-"""Prompt for the presentation generator."""
-
-# ruff: noqa: E501
+"""Prompts."""
 
 generation_prompt_template = """You are a presentation designer. Your task is to generate a valid JSON to be used with the `python-pptx` library to create a PowerPoint presentation.
 
@@ -14,9 +12,6 @@ Here is an example of a valid JSON for the topic "La dieta mediterránea y sus b
 
 And this is another example for the topic "El impacto de la inteligencia artificial en la educación":
 {json_example_minified_2}
-
-And another example for the topic "Cambio climático y sus efectos globales":
-{json_example_minified_3}
 
 Do not reuse these examples or imitate their structure!
 
@@ -64,6 +59,7 @@ Instructions:
 - DO NOT include any "$schema" field or the schema itself in the output.
 - The output must be a **valid JSON object only**, with no explanation or additional text.
 - If the output contains any "$schema" field, it is incorrect. Never include any JSON schema definitions.
+- The slides array must have exactly {count} valid items.
 
 Think carefully. Return only the corrected JSON.
 """
