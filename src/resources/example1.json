@@ -45,7 +45,7 @@
                         },
                         "position": {
                             "left": 0.5,
-                            "top": 1.7,
+                            "top": 2.0,
                             "width": 4.5,
                             "height": 2
                         }
@@ -176,11 +176,12 @@
                             ]
                         }
                     ],
-                    "legend_position": "right",
+                    "data_labels": true,
+                    "legend_position": "bottom",
                     "position": {
-                        "left": 2,
+                        "left": 1,
                         "top": 1.8,
-                        "width": 6,
+                        "width": 8,
                         "height": 4.5
                     }
                 }
@@ -241,27 +242,66 @@
                 },
                 "bullet_points": [
                     {
-                        "text": "Reduce el riesgo de enfermedades cardiovasculares.",
+                        "text": "Es rica en grasas saludables como el aceite de oliva, que ayudan a reducir el colesterol y la presión arterial.",
                         "style": {
                             "font_size": 18,
                             "color": "#117A65"
                         },
                         "position": {
                             "left": 1,
-                            "top": 1.7,
+                            "top": 1.6,
                             "width": 8,
                             "height": 0.8
                         }
                     },
                     {
-                        "text": "Favorece el control del peso corporal y el metabolismo.",
+                        "text": "Su alto contenido de fibra y alimentos de bajo índice glucémico ayudan a regular los niveles de azúcar en sangre.",
                         "style": {
                             "font_size": 18,
                             "color": "#117A65"
                         },
                         "position": {
                             "left": 1,
-                            "top": 2.6,
+                            "top": 2.3,
+                            "width": 8,
+                            "height": 0.8
+                        }
+                    },
+                    {
+                        "text": "Estudios sugieren que puede ayudar a prevenir enfermedades neurodegenerativas como el Alzheimer.",
+                        "style": {
+                            "font_size": 18,
+                            "color": "#117A65"
+                        },
+                        "position": {
+                            "left": 1,
+                            "top": 3.0,
+                            "width": 8,
+                            "height": 0.8
+                        }
+                    },
+                    {
+                        "text": "Puede ayudar a controlar el peso y prevenir la obesidad, asi como también enfermedades cardiovasculares.",
+                        "style": {
+                            "font_size": 18,
+                            "color": "#117A65"
+                        },
+                        "position": {
+                            "left": 1,
+                            "top": 3.7,
+                            "width": 8,
+                            "height": 0.8
+                        }
+                    },
+                    {
+                        "text": "Puede reducir la inflamación, mejorar la función cognitiva y favorecer la salud digestiva.",
+                        "style": {
+                            "font_size": 18,
+                            "color": "#117A65"
+                        },
+                        "position": {
+                            "left": 1,
+                            "top": 4.4,
                             "width": 8,
                             "height": 0.8
                         }

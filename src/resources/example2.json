@@ -45,7 +45,7 @@
                         },
                         "position": {
                             "left": 1,
-                            "top": 1.8,
+                            "top": 1.7,
                             "width": 8,
                             "height": 0.7
                         }
@@ -58,7 +58,7 @@
                         },
                         "position": {
                             "left": 1,
-                            "top": 2.7,
+                            "top": 2.3,
                             "width": 8,
                             "height": 0.7
                         }
@@ -71,7 +71,46 @@
                         },
                         "position": {
                             "left": 1,
-                            "top": 3.6,
+                            "top": 2.9,
+                            "width": 8,
+                            "height": 0.7
+                        }
+                    },
+                    {
+                        "text": "Apoyo individualizado mediante retroalimentación instantánea.",
+                        "style": {
+                            "font_size": 18,
+                            "color": "#154360"
+                        },
+                        "position": {
+                            "left": 1,
+                            "top": 3.5,
+                            "width": 8,
+                            "height": 0.7
+                        }
+                    },
+                    {
+                        "text": "Identificación de errores más frecuentes en los exámenes.",
+                        "style": {
+                            "font_size": 18,
+                            "color": "#154360"
+                        },
+                        "position": {
+                            "left": 1,
+                            "top": 4.1,
+                            "width": 8,
+                            "height": 0.7
+                        }
+                    },
+                    {
+                        "text": "Identificación de plagio en garantizando integridad académica.",
+                        "style": {
+                            "font_size": 18,
+                            "color": "#154360"
+                        },
+                        "position": {
+                            "left": 1,
+                            "top": 4.7,
                             "width": 8,
                             "height": 0.7
                         }
@@ -324,6 +363,32 @@
                                     "width": 4,
                                     "height": 2
                                 }
+                            },
+                            {
+                                "text": "Recolección y gestión de datos:\nLa IA depende de grandes cantidades de datos, lo que implica desafíos en su recolección, limpieza, organización y aseguramiento de accesibilidad.",
+                                "style": {
+                                    "font_size": 16,
+                                    "color": "#A93226"
+                                },
+                                "position": {
+                                    "left": 0.5,
+                                    "top": 3.1,
+                                    "width": 4,
+                                    "height": 2
+                                }
+                            },
+                            {
+                                "text": "Sesgo y Equidad Algorítmica:\nLos modelos de IA se entrenan con datos históricos, que pueden contener sesgos inherentes de raza, género o nivel socioeconómico. Esto puede llevar a resultados injustos o discriminatorios en la personalización del aprendizaje.",
+                                "style": {
+                                    "font_size": 16,
+                                    "color": "#A93226"
+                                },
+                                "position": {
+                                    "left": 0.5,
+                                    "top": 4.5,
+                                    "width": 4,
+                                    "height": 2
+                                }
                             }
                         ]
                     },
@@ -338,6 +403,32 @@
                                 "position": {
                                     "left": 5,
                                     "top": 1.7,
+                                    "width": 4,
+                                    "height": 2
+                                }
+                            },
+                            {
+                                "text": "Integridad Académica y Plagio:\nLas herramientas de IA generativa pueden ser utilizadas para redactar ensayos, responder a exámenes, y más, dificultando la detección de plagio.",
+                                "style": {
+                                    "font_size": 16,
+                                    "color": "#A93226"
+                                },
+                                "position": {
+                                    "left": 5,
+                                    "top": 3.1,
+                                    "width": 4,
+                                    "height": 2
+                                }
+                            },
+                            {
+                                "text": "Calidad del Contenido y Errores de la IA:\nLa IA es tan buena como los datos con los que se entrena. Si los datos son inexactos, desactualizados o sesgados, la información generada por la IA también lo será, lo que puede llevar a la desinformación.",
+                                "style": {
+                                    "font_size": 16,
+                                    "color": "#A93226"
+                                },
+                                "position": {
+                                    "left": 5,
+                                    "top": 4.5,
                                     "width": 4,
                                     "height": 2
                                 }
