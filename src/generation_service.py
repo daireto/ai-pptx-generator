@@ -59,7 +59,7 @@ class GenerationService:
                     except Exception as e:  # noqa: BLE001
                         logger.error(f'JSON test failed: {e}')
 
-                logger.info(f'Fixing JSON... (try {i + 1}/2)')
+                logger.info(f'Fixing JSON... (try {i + 1}/3)')
                 yield self._build_event_message('\nFIX-JSON-STEP\n')
                 fixed_json = ''
                 for chunk in self._json_generator.fix_json(json_response):
